@@ -8,7 +8,6 @@ import numpy as np
 import metrics
 from .utils import transform_compatibilities_cost
 from solver import SolverConcorde
-from config import WORKLOAD_PERC
 from utils import (
     blocks_from_documents_collection,
     neighbors_from_blocks,
@@ -22,15 +21,13 @@ from query_strategies import (
 
 def print_report(cnt, total, record):
     print(
-        "[{}/{}] {} {} wload={:.2f} iter={}/{} num_pred_mistakes={}/{} acc_ori={:.2f} acc_new={:.2f}".format(
+        "[{}/{}] {} {} wload={:.2f} soft_range={:.2f} num_pred_mistakes={}/{} acc_ori={:.2f} acc_new={:.2f}".format(
             cnt,
             total,
             record["dataset_test"],
             record["query_st"],
             record["workload"],
-            record["soft-range"],
-            record["curr_iter"],
-            record["num_iter"],
+            record["soft_range"],
             record["num_pred_mistakes"],
             record["num_total_mistakes"],
             100 * record["accuracy_original"],
@@ -98,7 +95,10 @@ def process_instance(instance):
             # pairs to be analyzed
             pairs_solution = perm_to_pairs(curr_solution)
             pairs_to_be_analyzed = fquery(
-                pairs_solution, curr_compatibilities, num_pairs_to_be_analyzed, soft_range
+                pairs_solution,
+                curr_compatibilities,
+                num_pairs_to_be_analyzed,
+                soft_range,
             )
 
             # real number of mistakes
@@ -172,26 +172,6 @@ if __name__ == "__main__":
         help="Reconstruction approach [cl/dml].",
     )
     parser.add_argument(
-        "-so",
-        "--solver",
-        action="store",
-        dest="solver",
-        required=False,
-        type=str,
-        default="concorde",
-        help="Solver.",
-    )
-    parser.add_argument(
-        "-qt",
-        "--query-st",
-        action="store",
-        dest="query_st",
-        required=False,
-        nargs="+",
-        default=,
-        help="Query strategy.",
-    )
-    parser.add_argument(
         "-np",
         "--num-proc",
         action="store",
@@ -219,6 +199,7 @@ if __name__ == "__main__":
         dest="soft_range",
         required=False,
         nargs="+",
+        type=float,
         default=[100.0],
         help="Range for the softmax func.",
     )
@@ -235,12 +216,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    for query_st in args.query_st:
-        assert query_st in [
-            "unc-l",
-            "unc-rl",
-        ]
-
     fname = ".results/sensitivity_analysis.json"
     records = []
     if os.path.exists(fname):
@@ -254,7 +229,7 @@ if __name__ == "__main__":
 
     instances = []
     for instance in json.load(open(".results/multi.json"))["records"]:
-        if instance["solver"] == args.solver and instance["approach"] == args.approach:
+        if instance["solver"] == "concorde" and instance["approach"] == args.approach:
             instances.append(instance)
             instance["args"] = args
 

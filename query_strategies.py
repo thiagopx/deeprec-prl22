@@ -7,7 +7,7 @@ def perm_to_pairs(perm):
     return [(perm[i], perm[i + 1]) for i in range(len(perm) - 1)]
 
 
-def uncertainty(matrix, norm_method="softmax", axis=0, soft_range=1000):
+def uncertainty(matrix, norm_method="softmax", axis=0, soft_range=1000, eps=1e-07):
     """uncertainty."""
     assert norm_method in ["standard", "softmax"]
 
@@ -16,8 +16,9 @@ def uncertainty(matrix, norm_method="softmax", axis=0, soft_range=1000):
         mask = ~np.isin(matrix, [np.inf, -np.inf])
         max_val = matrix[mask].max()
         matrix = soft_range * (matrix / max_val)
-        num = np.exp(-matrix)
+        num = np.exp(-matrix) + eps
         den = np.sum(num, axis=axis, keepdims=True)
+        print((den == 0).sum())
         probs = np.divide(num, den, out=np.zeros_like(num), where=num != np.inf)
         probs[num == np.inf] = 1.0
     else:
