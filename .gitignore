@@ -1,0 +1,10 @@
+*/*/*/__pycache__/
+*/*/__pycache__/
+*/__pycache__/
+datasets/
+*.py[cod]
+illustration/heatmap/
+illustration/reconstruction/
+instructions.txt
+.traindata/
+.results
