@@ -75,6 +75,7 @@ def get_dataframe(fname):
             "query-st",
             "solver",
             "workload",
+            "soft-range",
             "accuracy",
             "accuracy-original",
             "curr-iter",
@@ -229,6 +230,78 @@ def plot_by_iter(df):
         fp.fig.tight_layout(pad=0.75)
         plt.savefig(
             "notebooks/results/charts/by_iter_{}.pdf".format(query_st),
+            dpi=300,
+            bbox_inches="tight",
+        )
+
+
+def plot_sensitivity_analysis(df):
+    # df = df[df["num-iter"] == 1]
+    approaches = ["dml", "cl"]
+
+    for approach in approaches:
+        df_app = df[df["approach"] == approach]
+        fp = sns.FacetGrid(
+            hue="query-st",
+            hue_order=["unc-l", "unc-rl"],
+            height=3,
+            aspect=1.3,
+            col="dataset-test",
+            col_order=["S-MARQUES", "S-ISRI-OCR", "S-CDIP"],
+            sharey=False,
+            data=df_app,
+            legend_out=True,
+        )
+        fp = fp.map(
+            sns.lineplot,
+            "soft-range",
+            "accuracy",
+            ci=None,
+            linewidth=2,
+            marker="o",
+            markersize=4,
+            markeredgewidth=0.1,
+        )
+        fp = fp.add_legend(title="query st.", fontsize=22, labelspacing=0.25)
+        fp.set_axis_labels("$\\lambda$", "accuracy (\%)", fontsize=26)
+
+        # adjust each axis
+        for ax in fp.axes.flatten():
+            ax.spines["left"].set_visible(False)
+            ax.spines["top"].set_visible(False)
+            ax.spines["right"].set_visible(False)
+            dataset = ax.title.get_text()
+            dataset = dataset.replace("dataset-test = ", "")
+            dataset = map_dataset[dataset]
+            ax.set_title(dataset, fontsize=24)
+            # ax.set_xticks([0, 0.1, 0.15, 0.2, 0.25])
+            # ax.set_xticklabels(["0", "0.1", "0.15", "0.2", "0.25"])
+            for text in ax.get_xticklabels():
+                text.set_fontsize(20)
+                text.set_usetex(False)
+            for text in ax.get_yticklabels():
+                text.set_fontsize(20)
+                text.set_usetex(False)
+
+        leg = fp._legend
+        leg.get_title().set_fontsize(20)
+        for text in leg.get_texts():
+            text.set_fontsize(20)
+            text.set_text(map_query[text.get_text()])
+
+        bb = leg.get_bbox_to_anchor().transformed(
+            fp.axes.flatten()[-1].transAxes.inverted()
+        )
+        dx = 0.1
+        dy = 0
+        bb.y0 += dy
+        bb.y1 += dy
+        bb.x0 += dx
+        bb.x1 += dx
+        leg.set_bbox_to_anchor(bb, fp.axes.flatten()[-1].transAxes)
+        fp.fig.tight_layout(pad=0.5)
+        plt.savefig(
+            "notebooks/results/charts/sens_{}.pdf".format(approach),
             dpi=300,
             bbox_inches="tight",
         )

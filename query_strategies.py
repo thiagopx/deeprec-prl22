@@ -18,7 +18,6 @@ def uncertainty(matrix, norm_method="softmax", axis=0, soft_range=1000, eps=1e-0
         matrix = soft_range * (matrix / max_val)
         num = np.exp(-matrix) + eps
         den = np.sum(num, axis=axis, keepdims=True)
-        print((den == 0).sum())
         probs = np.divide(num, den, out=np.zeros_like(num), where=num != np.inf)
         probs[num == np.inf] = 1.0
     else:

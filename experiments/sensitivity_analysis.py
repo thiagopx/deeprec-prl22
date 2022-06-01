@@ -220,11 +220,7 @@ if __name__ == "__main__":
     records = []
     if os.path.exists(fname):
         for record in json.load(open(fname))["records"]:
-            if (
-                record["solver"] != args.solver
-                or record["approach"] != args.approach
-                or record["query_st"] not in args.query_st
-            ):
+            if record["solver"] != "concorde" or record["approach"] != args.approach:
                 records.append(record)
 
     instances = []
