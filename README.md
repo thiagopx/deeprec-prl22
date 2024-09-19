@@ -12,4 +12,4 @@ Source code for the paper:
   publisher={Elsevier}
 }
 
-Paper [url](https://www.sciencedirect.com/science/article/pii/S016786552200304X)
+[Link to the paper](https://www.sciencedirect.com/science/article/pii/S016786552200304X)
